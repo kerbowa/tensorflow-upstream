@@ -764,13 +764,10 @@ cc_library(
         "//tensorflow/compiler/xla/service/gpu/llvm_gpu_backend",
         "//tensorflow/compiler/xla/service/llvm_ir:llvm_util",
         "//tensorflow/compiler/xla/service/llvm_ir:llvm_target_features",
-        "//tensorflow/core:cuda_libdevice_path",
-        "//tensorflow/core:rocm_rocdl_path",
         "//tensorflow/core:lib",
         "//tensorflow/core:lib_internal",
         "//tensorflow/core:regexp_internal",
         "//tensorflow/core:stream_executor_no_cuda",
-        "//tensorflow/stream_executor/cuda:cuda_diagnostics",
         "@com_google_absl//absl/container:node_hash_map",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/strings",
@@ -778,8 +775,13 @@ cc_library(
         "@com_google_absl//absl/types:span",
         "@llvm//:core",
     ]+
-    if_cuda_is_configured(if_cuda([":cuda_conv_algorithm_picker"])) +
-    if_rocm_is_configured(if_rocm([":miopen_conv_algorithm_picker"])),
+    if_cuda_is_configured(if_cuda([":cuda_conv_algorithm_picker",
+        "//tensorflow/stream_executor/cuda:cuda_diagnostics",
+        "//tensorflow/core:cuda_libdevice_path",
+                    ])) +
+    if_rocm_is_configured(if_rocm([":miopen_conv_algorithm_picker",
+        "//tensorflow/core:rocm_rocdl_path",
+                    ])),
     alwayslink = True,  # Contains compiler registration
 )
 
@@ -1036,7 +1038,7 @@ cc_library(
 tf_cc_test(
     name = "cudnn_fused_conv_rewriter_test",
     srcs = ["cudnn_fused_conv_rewriter_test.cc"],
-    tags = tf_cuda_tests_tags(),
+    tags = if_cuda_is_configured(if_cuda(["tf_cuda_tests_tags()"])),
     deps = [
         "//tensorflow/compiler/xla/service:hlo_parser",
         "//tensorflow/compiler/xla/service/gpu:ir_emission_utils",
