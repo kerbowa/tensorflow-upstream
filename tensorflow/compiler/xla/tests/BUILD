@@ -1772,7 +1772,6 @@ xla_test(
 tf_cc_test(
     name = "llvm_compiler_test",
     srcs = ["llvm_compiler_test.cc"],
-    tags = tf_cuda_tests_tags(),
     deps = [
         "//tensorflow/compiler/xla:literal_util",
         "//tensorflow/compiler/xla:test_helpers",

@@ -153,8 +153,7 @@ llvm::Value* EmitPrintf(absl::string_view fmt,
 // can't correctly do so on both Volta and earlier GPUs.
 //
 // https://docs.nvidia.com/cuda/parallel-thread-execution/#data-movement-and-conversion-instructions-shfl-sync
-llvm::Value* EmitFullWarpShuffleDown(llvm::Value* value, llvm::Value* offset,
-                                     llvm::IRBuilder<>* builder, llvm::Module* module);
+llvm::Value* EmitFullWarpShuffleDown(llvm::Value* value, llvm::Value* offset, llvm::IRBuilder<>* builder);
 
 // Emits code that determines whether the current thread is thread 0 within
 // block 0 of the kernel.

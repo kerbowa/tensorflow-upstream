@@ -427,6 +427,31 @@ cc_library(
 )
 
 cc_library(
+    name = "miopen_conv_algorithm_picker",
+    srcs = ["miopen_conv_algorithm_picker.cc"],
+    hdrs = ["miopen_conv_algorithm_picker.h"],
+    deps = [
+        ":backend_configs",
+        ":buffer_comparator",
+        ":cudnn_conv_runner",
+        ":gpu_executable",
+        ":ir_emission_utils",
+        "//tensorflow/compiler/xla:literal_util",
+        "//tensorflow/compiler/xla/service:compiler",
+        "//tensorflow/compiler/xla/service:device_memory_allocator",
+        "//tensorflow/compiler/xla/service:hlo",
+        "//tensorflow/compiler/xla/service:hlo_casting_utils",
+        "//tensorflow/compiler/xla/service:hlo_pass",
+        "//tensorflow/core:lib",
+        "//tensorflow/core:stream_executor_no_cuda",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/strings:str_format",
+        "@com_google_absl//absl/time",
+        "@com_google_absl//absl/types:optional",
+    ],
+)
+
+cc_library(
     name = "cudnn_conv_runner",
     srcs = ["cudnn_conv_runner.cc"],
     hdrs = ["cudnn_conv_runner.h"],
@@ -679,7 +704,6 @@ cc_library(
     hdrs = if_cuda_is_configured(if_cuda(["nvptx_compiler.h"])) +
            if_rocm_is_configured(if_rocm(["amdgpu_compiler.h"])),
     deps = [
-        ":cudnn_conv_algorithm_picker",
         ":cudnn_conv_pad_for_tensor_cores",
         ":cudnn_conv_padding_legalization",
         ":cudnn_conv_rewriter",
@@ -730,6 +754,7 @@ cc_library(
         "//tensorflow/compiler/xla/service:llvm_compiler",
         "//tensorflow/compiler/xla/service:reduce_precision_insertion",
         "//tensorflow/compiler/xla/service:reshape_mover",
+        "//tensorflow/compiler/xla/service:scatter_expander",
         "//tensorflow/compiler/xla/service:transpose_folding",
         "//tensorflow/compiler/xla/service:tuple_simplifier",
         "//tensorflow/compiler/xla/service:while_loop_constant_sinking",
@@ -752,7 +777,9 @@ cc_library(
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
         "@llvm//:core",
-    ],
+    ]+
+    if_cuda_is_configured(if_cuda([":cuda_conv_algorithm_picker"])) +
+    if_rocm_is_configured(if_rocm([":miopen_conv_algorithm_picker"])),
     alwayslink = True,  # Contains compiler registration
 )
 
